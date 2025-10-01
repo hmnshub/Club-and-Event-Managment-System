@@ -1,40 +1,23 @@
 import mongoose from 'mongoose'
 
 const studentSchema = new mongoose.Schema({
-  googleId: {
+  name: {
     type: String,
-    required: true,
-    unique: true
+    required: true
   },
   email: {
     type: String,
     required: true,
     unique: true
   },
-  name: {
+  username: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  password: {
     type: String,
     required: true
-  },
-  picture: {
-    type: String
-  },
-  studentId: {
-    type: String,
-    required: false,
-    unique: true,
-    sparse: true // Allows multiple null values
-  },
-  phone: {
-    type: String
-  },
-  year: {
-    type: String,
-    enum: ['1st Year', '2nd Year', '3rd Year', '4th Year', 'Graduate'],
-    default: '1st Year'
-  },
-  major: {
-    type: String,
-    required: false
   },
   registeredClubs: [{
     type: mongoose.Schema.Types.ObjectId,

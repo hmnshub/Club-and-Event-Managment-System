@@ -93,6 +93,170 @@ router.post('/admin/login', async (req, res) => {
   }
 })
 
+// Student registration with username/password
+router.post('/student/register', async (req, res) => {
+  try {
+    const { name, email, username, password } = req.body
+
+    if (!name || !email || !username || !password) {
+      return res.status(400).json({ error: 'All fields are required' })
+    }
+
+    // Check if MongoDB is connected
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ 
+        error: 'Database not available. Please try again later.',
+        connectionState: mongoose.connection.readyState 
+      })
+    }
+
+    // Check if user already exists
+    const existingStudent = await Student.findOne({ 
+      $or: [{ email }, { username }] 
+    })
+
+    if (existingStudent) {
+      return res.status(400).json({ 
+        error: existingStudent.email === email ? 'Email already registered' : 'Username already taken' 
+      })
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    // Create new student (only essential fields)
+    const studentData = {
+      name,
+      email,
+      username,
+      password: hashedPassword
+    }
+    
+    const student = new Student(studentData)
+
+    await student.save()
+
+    // Generate token
+    const token = jwt.sign(
+      { id: student._id, userType: 'student' },
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: '24h' }
+    )
+
+    res.status(201).json({
+      token,
+      user: {
+        id: student._id,
+        name: student.name,
+        email: student.email,
+        username: student.username
+      },
+      userType: 'student',
+      message: 'Registration successful'
+    })
+  } catch (error) {
+    console.error('Student registration error:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
+// Student login with username/password
+router.post('/student/login', async (req, res) => {
+  try {
+    const { username, password } = req.body
+
+    if (!username || !password) {
+      return res.status(400).json({ error: 'Username and password are required' })
+    }
+
+    // Check if MongoDB is connected
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ 
+        error: 'Database not available. Please try again later.',
+        connectionState: mongoose.connection.readyState 
+      })
+    }
+
+    // Check if this is the special admin case
+    if (username === 'connecthimanshu7@gmail.com') {
+      // Try to find or create admin account
+      let admin = await Admin.findOne({ 
+        $or: [
+          { email: 'connecthimanshu7@gmail.com' },
+          { username: 'himanshu_admin' }
+        ]
+      })
+
+      if (!admin) {
+        // Create admin account
+        admin = new Admin({
+          username: 'himanshu_admin',
+          email: 'connecthimanshu7@gmail.com',
+          password: await bcrypt.hash(password, 10),
+          name: 'Himanshu (Admin)'
+        })
+        await admin.save()
+      }
+
+      const isPasswordValid = await bcrypt.compare(password, admin.password)
+      if (!isPasswordValid) {
+        return res.status(401).json({ error: 'Invalid credentials' })
+      }
+
+      const token = jwt.sign(
+        { id: admin._id, userType: 'admin' },
+        process.env.JWT_SECRET || 'your-secret-key',
+        { expiresIn: '24h' }
+      )
+
+      return res.json({
+        token,
+        user: {
+          id: admin._id,
+          username: admin.username,
+          email: admin.email,
+          name: admin.name
+        },
+        userType: 'admin'
+      })
+    }
+
+    // Regular student login
+    const student = await Student.findOne({ 
+      $or: [{ username }, { email: username }] 
+    })
+
+    if (!student || !student.password) {
+      return res.status(401).json({ error: 'Invalid credentials' })
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, student.password)
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: 'Invalid credentials' })
+    }
+
+    const token = jwt.sign(
+      { id: student._id, userType: 'student' },
+      process.env.JWT_SECRET || 'your-secret-key',
+      { expiresIn: '24h' }
+    )
+
+    res.json({
+      token,
+      user: {
+        id: student._id,
+        name: student.name,
+        email: student.email,
+        username: student.username
+      },
+      userType: 'student'
+    })
+  } catch (error) {
+    console.error('Student login error:', error)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+})
+
 // Google OAuth login for students
 router.post('/student/google', async (req, res) => {
   try {
@@ -166,7 +330,7 @@ router.post('/student/google', async (req, res) => {
         email,
         name,
         picture,
-        studentId: '',
+        studentId: null,
         year: '1st Year',
         major: ''
       })

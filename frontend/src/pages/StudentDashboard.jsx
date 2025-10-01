@@ -47,9 +47,7 @@ function StudentDashboard({ user }) {
       <div className="dashboard-header">
         <h1>Welcome, {user.name}!</h1>
         <div className="user-info">
-          <p>Student ID: {user.studentId}</p>
           <p>Email: {user.email}</p>
-          <p>Year: {user.year} | Major: {user.major}</p>
         </div>
       </div>
 
