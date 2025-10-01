@@ -1,0 +1,243 @@
+/* Registration Pages Styles */
+.registration-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: calc(100vh - 80px);
+  padding: 20px;
+}
+
+.registration-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 700px;
+  overflow: hidden;
+}
+
+/* Header Styles */
+.club-header,
+.event-header {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+  padding: 30px;
+  text-align: center;
+}
+
+.club-header h1,
+.event-header h1 {
+  margin-bottom: 10px;
+  font-size: 2rem;
+}
+
+/* Info Section */
+.club-info,
+.event-info {
+  padding: 30px;
+}
+
+.description {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #333;
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.info-item {
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 4px solid #007bff;
+}
+
+.info-item strong {
+  color: #333;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.club-info-item {
+  background: #e3f2fd;
+  border-left-color: #1976d2;
+}
+
+.requirements {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 6px;
+  padding: 20px;
+  margin-bottom: 25px;
+}
+
+.requirements strong {
+  color: #856404;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.requirements p {
+  color: #856404;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Registration Actions */
+.registration-actions {
+  background: #f8f9fa;
+  padding: 30px;
+}
+
+.already-registered {
+  text-align: center;
+  color: #28a745;
+}
+
+.already-registered p {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+.registration-closed {
+  text-align: center;
+  color: #dc3545;
+}
+
+.registration-closed p {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 20px;
+}
+
+.back-btn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.back-btn:hover {
+  background: #545b62;
+}
+
+/* Registration Form */
+.registration-form {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.student-info {
+  background: white;
+  border: 2px solid #007bff;
+  border-radius: 8px;
+  padding: 25px;
+  margin-bottom: 30px;
+}
+
+.student-info h3 {
+  color: #007bff;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.student-info p {
+  margin: 10px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.student-info strong {
+  color: #333;
+  min-width: 100px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.cancel-btn {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s ease;
+  min-width: 120px;
+}
+
+.cancel-btn:hover {
+  background: #545b62;
+}
+
+.register-btn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  min-width: 180px;
+}
+
+.register-btn:hover:not(:disabled) {
+  background: #1e7e34;
+}
+
+.register-btn:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .registration-container {
+    padding: 10px;
+  }
+  
+  .club-header h1,
+  .event-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .club-info,
+  .event-info,
+  .registration-actions {
+    padding: 20px;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .student-info p {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+}
