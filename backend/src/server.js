@@ -20,7 +20,10 @@ app.use(cors({
     'http://localhost:3002',
     'http://localhost:3003',
     'http://localhost:5173',
-    'http://localhost:5174'
+    'http://localhost:5174',
+    // Add Vercel domains
+    /^https:\/\/.*\.vercel\.app$/,
+    /^https:\/\/club-and-event-management-system.*\.vercel\.app$/
   ],
   credentials: true
 }))
@@ -107,3 +110,6 @@ function startServer() {
     }
   })
 }
+
+// Export app for Vercel serverless functions
+export default app
