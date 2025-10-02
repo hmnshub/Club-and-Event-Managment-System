@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import axios from 'axios'
+import '../config/api' // Import API configuration
 import './Login.css'
 
 function Register({ setUser, setUserType }) {
@@ -35,7 +36,7 @@ function Register({ setUser, setUserType }) {
 
     try {
       const { confirmPassword, ...registrationData } = formData
-      const result = await axios.post('http://localhost:5000/api/auth/student/register', registrationData)
+      const result = await axios.post('/api/auth/student/register', registrationData)
       
       const { token, user, userType } = result.data
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import '../config/api' // Import API configuration
 import './Login.css'
 
 function CompleteProfile({ setUser }) {
@@ -43,7 +44,7 @@ function CompleteProfile({ setUser }) {
 
     try {
       const token = localStorage.getItem('token')
-      const response = await axios.post('http://localhost:5000/api/auth/student/profile', {
+      const response = await axios.post('/api/auth/student/profile', {
         token,
         ...formData
       })

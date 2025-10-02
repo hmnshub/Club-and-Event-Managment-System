@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import '../config/api' // Import API configuration
 import './Login.css'
 
 // Google OAuth configuration
@@ -36,7 +37,7 @@ function StudentLogin({ setUser, setUserType }) {
     setError('')
 
     try {
-      const result = await axios.post('http://localhost:5000/api/auth/student/google', {
+      const result = await axios.post('/api/auth/student/google', {
         token: response.credential
       })
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import axios from 'axios'
+import '../config/api' // Import API configuration
 import './Login.css'
 
 // Google OAuth configuration
@@ -51,7 +52,7 @@ function Login({ setUser, setUserType }) {
     setError('')
 
     try {
-      const result = await axios.post('http://localhost:5000/api/auth/student/google', {
+      const result = await axios.post('/api/auth/student/google', {
         token: response.credential
       })
 
@@ -92,17 +93,17 @@ function Login({ setUser, setUserType }) {
       if (isAdminEmail) {
         // Try admin login first
         try {
-          result = await axios.post('http://localhost:5000/api/auth/admin/login', {
+          result = await axios.post('/api/auth/admin/login', {
             username: 'himanshu_admin',
             password: formData.password
           })
         } catch (adminError) {
           // If admin login fails, try creating/updating admin account
-          result = await axios.post('http://localhost:5000/api/auth/student/login', formData)
+          result = await axios.post('/api/auth/student/login', formData)
         }
       } else {
         // Regular student login
-        result = await axios.post('http://localhost:5000/api/auth/student/login', formData)
+        result = await axios.post('/api/auth/student/login', formData)
       }
 
       const { token, user, userType } = result.data
