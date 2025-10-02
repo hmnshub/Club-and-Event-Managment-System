@@ -3,14 +3,14 @@
   "name": "student-clubs-backend",
   "builds": [
     {
-      "src": "api/index.js",
+      "src": "src/server.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "api/index.js"
+      "dest": "src/server.js"
     }
   ]
 }
