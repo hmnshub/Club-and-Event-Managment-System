@@ -15,23 +15,19 @@ const app = express()
 // Trust proxy for Vercel
 app.set('trust proxy', 1)
 
-// Middleware
+// CORS configuration - Allow all origins for Vercel deployment
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:3001', 
-    'http://localhost:3002',
-    'http://localhost:3003',
-    'http://localhost:5173',
-    'http://localhost:5174',
-    // Add Vercel domains
-    /^https:\/\/.*\.vercel\.app$/,
-    /^https:\/\/club-and-event-management-system.*\.vercel\.app$/
-  ],
+  origin: true, // Allow all origins
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 }))
+
+// Handle preflight requests
+app.options('*', cors())
 
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
