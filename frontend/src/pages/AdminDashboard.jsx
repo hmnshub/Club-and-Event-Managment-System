@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import axios from 'axios'
+import axios from '../config/api' // Import configured axios instance
 import './Dashboard.css'
 
 function AdminDashboard({ user }) {

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import axios from 'axios'
-import '../config/api' // Import API configuration
+import axios from '../config/api' // Import configured axios instance
 import './Login.css'
 
 // Google OAuth configuration

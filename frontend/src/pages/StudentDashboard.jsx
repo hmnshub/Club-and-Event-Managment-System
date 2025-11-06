@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import axios from 'axios'
+import axios from '../config/api' // Import configured axios instance
 import './Dashboard.css'
 
 function StudentDashboard({ user }) {
