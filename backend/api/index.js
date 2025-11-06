@@ -7,8 +7,8 @@ import authRoutes from '../src/routes/auth.js'
 import clubRoutes from '../src/routes/clubs.js'
 import eventRoutes from '../src/routes/events.js'
 
-// Load environment variables
-dotenv.config({ path: '../.env' })
+// Load environment variables (Vercel handles this automatically)
+dotenv.config()
 
 const app = express()
 
@@ -34,6 +34,12 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 
 // Connect to MongoDB (only if not already connected)
 const MONGODB_URI = process.env.MONGODB_URI
+
+// Debug logging
+console.log('Environment check:')
+console.log('- MONGODB_URI exists:', !!MONGODB_URI)
+console.log('- MONGODB_URI length:', MONGODB_URI ? MONGODB_URI.length : 0)
+console.log('- MONGODB_URI prefix:', MONGODB_URI ? MONGODB_URI.substring(0, 30) : 'none')
 
 let isConnected = false
 let isConnecting = false
