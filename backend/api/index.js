@@ -31,7 +31,13 @@ app.use('/api/events', eventRoutes)
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Server is running' })
+  res.json({ 
+    status: 'OK', 
+    message: 'Server is running',
+    version: '2.0',
+    mongoState: mongoose.connection.readyState,
+    timestamp: new Date().toISOString()
+  })
 })
 
 // Root route
