@@ -103,6 +103,15 @@ app.use('/api/auth', authRoutes)
 app.use('/api/clubs', clubRoutes)
 app.use('/api/events', eventRoutes)
 
+// Root route for basic check
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Student Clubs & Events API', 
+    status: 'Running',
+    endpoints: ['/api/auth', '/api/clubs', '/api/events', '/api/health']
+  })
+})
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ 
