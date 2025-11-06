@@ -36,30 +36,50 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }))
 const MONGODB_URI = process.env.MONGODB_URI
 
 let isConnected = false
+let isConnecting = false
 
 const connectToDatabase = async () => {
-  if (isConnected) {
-    return
+  if (isConnected && mongoose.connection.readyState === 1) {
+    return true
   }
+
+  if (isConnecting) {
+    // Wait for ongoing connection
+    await new Promise(resolve => setTimeout(resolve, 100))
+    return mongoose.connection.readyState === 1
+  }
+
+  isConnecting = true
 
   try {
     if (MONGODB_URI) {
+      console.log('Attempting MongoDB connection...')
       await mongoose.connect(MONGODB_URI, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-        bufferCommands: false,
-        maxPoolSize: 10,
+        serverSelectionTimeoutMS: 5000,
+        socketTimeoutMS: 45000,
       })
       isConnected = true
+      isConnecting = false
       console.log('✅ Connected to MongoDB')
+      return true
+    } else {
+      console.log('⚠️ No MONGODB_URI provided')
+      isConnecting = false
+      return false
     }
   } catch (error) {
-    console.error('❌ MongoDB connection error:', error)
+    console.error('❌ MongoDB connection error:', error.message)
+    isConnecting = false
+    isConnected = false
+    return false
   }
 }
 
-// Connect to database
-connectToDatabase()
+// Middleware to ensure DB connection before handling requests
+app.use(async (req, res, next) => {
+  await connectToDatabase()
+  next()
+})
 
 // Routes
 app.use('/api/auth', authRoutes)
