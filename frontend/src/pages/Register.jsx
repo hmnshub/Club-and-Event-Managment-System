@@ -35,7 +35,7 @@ function Register({ setUser, setUserType }) {
 
     try {
       const { confirmPassword, ...registrationData } = formData
-      const result = await axios.post('/api/auth/student/register', registrationData)
+      const result = await axios.post('/api/register', registrationData)
       
       const { token, user, userType } = result.data
 
