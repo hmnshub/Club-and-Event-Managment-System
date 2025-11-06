@@ -45,7 +45,11 @@ const connectToDatabase = async () => {
 
   if (isConnecting) {
     // Wait for ongoing connection
-    await new Promise(resolve => setTimeout(resolve, 100))
+    let attempts = 0
+    while (isConnecting && attempts < 50) {
+      await new Promise(resolve => setTimeout(resolve, 100))
+      attempts++
+    }
     return mongoose.connection.readyState === 1
   }
 
@@ -54,8 +58,14 @@ const connectToDatabase = async () => {
   try {
     if (MONGODB_URI) {
       console.log('Attempting MongoDB connection...')
+      
+      // Close existing connection if any
+      if (mongoose.connection.readyState !== 0) {
+        await mongoose.disconnect()
+      }
+      
       await mongoose.connect(MONGODB_URI, {
-        serverSelectionTimeoutMS: 5000,
+        serverSelectionTimeoutMS: 10000,
         socketTimeoutMS: 45000,
       })
       isConnected = true
@@ -69,6 +79,7 @@ const connectToDatabase = async () => {
     }
   } catch (error) {
     console.error('❌ MongoDB connection error:', error.message)
+    console.error('Error details:', error)
     isConnecting = false
     isConnected = false
     return false
@@ -91,7 +102,8 @@ app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'OK', 
     message: 'API is working!',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    mongoStatus: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
   })
 })
 
@@ -103,6 +115,7 @@ app.get('/api/health/db', (req, res) => {
     status: states[state] || String(state),
     readyState: state,
     hasUri: Boolean(process.env.MONGODB_URI),
+    uriPrefix: process.env.MONGODB_URI ? process.env.MONGODB_URI.substring(0, 20) + '...' : 'none'
   })
 })
 
