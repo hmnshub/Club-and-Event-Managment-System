@@ -102,12 +102,12 @@ router.post('/student/register', async (req, res) => {
       return res.status(400).json({ error: 'All fields are required' })
     }
 
-    // Check if MongoDB is connected
-    if (mongoose.connection.readyState !== 1) {
-      return res.status(503).json({ 
-        error: 'Database not available. Please try again later.',
-        connectionState: mongoose.connection.readyState 
-      })
+    // Try to ensure connection (but don't fail if it's not ready)
+    if (mongoose.connection.readyState === 0) {
+      const MONGODB_URI = process.env.MONGODB_URI
+      if (MONGODB_URI) {
+        await mongoose.connect(MONGODB_URI)
+      }
     }
 
     // Check if user already exists
@@ -169,12 +169,12 @@ router.post('/student/login', async (req, res) => {
       return res.status(400).json({ error: 'Username and password are required' })
     }
 
-    // Check if MongoDB is connected
-    if (mongoose.connection.readyState !== 1) {
-      return res.status(503).json({ 
-        error: 'Database not available. Please try again later.',
-        connectionState: mongoose.connection.readyState 
-      })
+    // Try to ensure connection (but don't fail if it's not ready)
+    if (mongoose.connection.readyState === 0) {
+      const MONGODB_URI = process.env.MONGODB_URI
+      if (MONGODB_URI) {
+        await mongoose.connect(MONGODB_URI)
+      }
     }
 
     // Check if this is the special admin case
@@ -266,12 +266,12 @@ router.post('/student/google', async (req, res) => {
       return res.status(400).json({ error: 'Google token is required' })
     }
 
-    // Check if MongoDB is connected
-    if (mongoose.connection.readyState !== 1) {
-      return res.status(503).json({ 
-        error: 'Database not available. Please try again later.',
-        connectionState: mongoose.connection.readyState 
-      })
+    // Try to ensure connection (but don't fail if it's not ready)
+    if (mongoose.connection.readyState === 0) {
+      const MONGODB_URI = process.env.MONGODB_URI
+      if (MONGODB_URI) {
+        await mongoose.connect(MONGODB_URI)
+      }
     }
 
     // Verify Google token
@@ -373,12 +373,12 @@ router.post('/student/profile', async (req, res) => {
       return res.status(400).json({ error: 'Token is required' })
     }
 
-    // Check if MongoDB is connected
-    if (mongoose.connection.readyState !== 1) {
-      return res.status(503).json({ 
-        error: 'Database not available. Please try again later.',
-        connectionState: mongoose.connection.readyState 
-      })
+    // Try to ensure connection (but don't fail if it's not ready)
+    if (mongoose.connection.readyState === 0) {
+      const MONGODB_URI = process.env.MONGODB_URI
+      if (MONGODB_URI) {
+        await mongoose.connect(MONGODB_URI)
+      }
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key')
