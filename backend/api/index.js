@@ -42,7 +42,11 @@ app.get('/api/health', (req, res) => {
 
 // Root route
 app.get('/', (req, res) => {
-  res.json({ message: 'Student Clubs API', status: 'Running' })
+  res.json({ 
+    message: 'Student Clubs API v3.0 - FIXED', 
+    status: 'Running',
+    timestamp: new Date().toISOString()
+  })
 })
 
 export default app
