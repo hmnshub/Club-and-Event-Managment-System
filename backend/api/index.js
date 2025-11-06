@@ -106,8 +106,9 @@ app.use('/api/events', eventRoutes)
 // Root route for basic check
 app.get('/', (req, res) => {
   res.json({ 
-    message: 'Student Clubs & Events API', 
+    message: 'Student Clubs & Events API v1.0', 
     status: 'Running',
+    timestamp: new Date().toISOString(),
     endpoints: ['/api/auth', '/api/clubs', '/api/events', '/api/health']
   })
 })
