@@ -17,7 +17,8 @@
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.0",
     "google-auth-library": "^8.7.0",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "mongodb": "^6.6.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.22"
