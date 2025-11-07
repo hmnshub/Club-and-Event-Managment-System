@@ -5,6 +5,7 @@ import dbConnect, { dbReadyState } from '../src/lib/db.js'
 import authRoutes from '../src/routes/auth.js'
 import clubRoutes from '../src/routes/clubs.js'
 import eventRoutes from '../src/routes/events.js'
+import simpleRegister from './simple-register.js'
 
 const app = express()
 
@@ -25,6 +26,18 @@ app.use(express.urlencoded({ extended: true }))
 app.use('/api/auth', authRoutes)
 app.use('/api/clubs', clubRoutes)
 app.use('/api/events', eventRoutes)
+
+// Simple serverless-native registration endpoint also exposed via Express
+app.options('/api/simple-register', (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*')
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+  return res.status(200).end()
+})
+
+app.post('/api/simple-register', async (req, res) => {
+  return simpleRegister(req, res)
+})
 
 // Health check
 app.get('/api/health', (req, res) => {
