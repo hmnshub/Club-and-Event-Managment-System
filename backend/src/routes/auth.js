@@ -5,6 +5,7 @@ import mongoose from 'mongoose'
 import { OAuth2Client } from 'google-auth-library'
 import Admin from '../models/Admin.js'
 import Student from '../models/Student.js'
+import dbConnect from '../lib/db.js'
 
 const router = express.Router()
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
@@ -12,6 +13,7 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 // Admin login
 router.post('/admin/login', async (req, res) => {
   try {
+    await dbConnect()
     const { username, password } = req.body
 
     if (!username || !password) {
@@ -96,19 +98,14 @@ router.post('/admin/login', async (req, res) => {
 // Student registration with username/password
 router.post('/student/register', async (req, res) => {
   try {
+    await dbConnect()
     const { name, email, username, password } = req.body
 
     if (!name || !email || !username || !password) {
       return res.status(400).json({ error: 'All fields are required' })
     }
 
-    // Try to ensure connection (but don't fail if it's not ready)
-    if (mongoose.connection.readyState === 0) {
-      const MONGODB_URI = process.env.MONGODB_URI
-      if (MONGODB_URI) {
-        await mongoose.connect(MONGODB_URI)
-      }
-    }
+    // DB ready via helper
 
     // Check if user already exists
     const existingStudent = await Student.findOne({ 
@@ -163,19 +160,14 @@ router.post('/student/register', async (req, res) => {
 // Student login with username/password
 router.post('/student/login', async (req, res) => {
   try {
+    await dbConnect()
     const { username, password } = req.body
 
     if (!username || !password) {
       return res.status(400).json({ error: 'Username and password are required' })
     }
 
-    // Try to ensure connection (but don't fail if it's not ready)
-    if (mongoose.connection.readyState === 0) {
-      const MONGODB_URI = process.env.MONGODB_URI
-      if (MONGODB_URI) {
-        await mongoose.connect(MONGODB_URI)
-      }
-    }
+    // DB ready via helper
 
     // Check if this is the special admin case
     if (username === 'connecthimanshu7@gmail.com') {
@@ -260,19 +252,14 @@ router.post('/student/login', async (req, res) => {
 // Google OAuth login for students
 router.post('/student/google', async (req, res) => {
   try {
+    await dbConnect()
     const { token } = req.body
 
     if (!token) {
       return res.status(400).json({ error: 'Google token is required' })
     }
 
-    // Try to ensure connection (but don't fail if it's not ready)
-    if (mongoose.connection.readyState === 0) {
-      const MONGODB_URI = process.env.MONGODB_URI
-      if (MONGODB_URI) {
-        await mongoose.connect(MONGODB_URI)
-      }
-    }
+    // DB ready via helper
 
     // Verify Google token
     const ticket = await client.verifyIdToken({
@@ -367,6 +354,7 @@ router.post('/student/google', async (req, res) => {
 // Update student profile (for new users)
 router.post('/student/profile', async (req, res) => {
   try {
+    await dbConnect()
     const { token, studentId, phone, year, major } = req.body
 
     if (!token) {
@@ -419,6 +407,7 @@ router.post('/student/profile', async (req, res) => {
 // Setup route to create initial admin (can be called once)
 router.post('/setup-admin', async (req, res) => {
   try {
+    await dbConnect()
     // Check if admin already exists
     const existingAdmin = await Admin.findOne({ email: 'connecthimanshu7@gmail.com' })
     

@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import mongoose from 'mongoose'
+import dbConnect, { dbReadyState } from '../src/lib/db.js'
 import authRoutes from '../src/routes/auth.js'
 import clubRoutes from '../src/routes/clubs.js'
 import eventRoutes from '../src/routes/events.js'
@@ -18,11 +19,7 @@ app.use(cors({
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
-// MongoDB connection
-const MONGODB_URI = process.env.MONGODB_URI
-if (MONGODB_URI) {
-  mongoose.connect(MONGODB_URI).catch(console.error)
-}
+// Do not eagerly connect here; use cached connection helper per request
 
 // Routes
 app.use('/api/auth', authRoutes)
@@ -37,6 +34,35 @@ app.get('/api/health', (req, res) => {
     version: '2.0',
     mongoState: mongoose.connection.readyState,
     timestamp: new Date().toISOString()
+  })
+})
+
+// DB health check with connect attempt
+app.get('/api/health/db', async (req, res) => {
+  const hasUri = Boolean(process.env.MONGODB_URI)
+  try {
+    if (hasUri) {
+      await dbConnect()
+    }
+    const state = dbReadyState()
+    const states = ['disconnected', 'connected', 'connecting', 'disconnecting']
+    res.json({
+      hasUri,
+      status: states[state] || String(state),
+      readyState: state
+    })
+  } catch (err) {
+    res.status(500).json({ hasUri, error: err.message, readyState: dbReadyState() })
+  }
+})
+
+// Minimal env debug (safe)
+app.get('/api/debug/env', (req, res) => {
+  const uri = process.env.MONGODB_URI || ''
+  res.json({
+    hasUri: Boolean(uri),
+    uriPrefix: uri ? uri.substring(0, 25) + '...' : null,
+    uriLength: uri.length
   })
 })
 
