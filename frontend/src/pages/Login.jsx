@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import axios from '../config/api' // Import configured axios instance
+import TypewriterText from '../components/TypewriterText'
 import './Login.css'
 
 // Google OAuth configuration
@@ -130,8 +131,11 @@ function Login({ setUser, setUserType }) {
   return (
     <div className="login-container-new">
       <div className="login-card">
+        <div className="auth-tagline">
+          <TypewriterText text="Discover clubs. Join events. Get involved." speed={32} />
+        </div>
         <h2 className="login-title">Login</h2>
-        
+
         {error && <div className="error-message">{error}</div>}
         
         <form onSubmit={handleSubmit} className="login-form-new">

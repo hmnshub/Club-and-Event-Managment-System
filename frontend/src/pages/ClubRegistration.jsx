@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation } from '@tanstack/react-query'
+import { motion } from 'framer-motion'
 import axios from '../config/api' // Import configured axios instance
+import { useToast } from '../context/ToastContext'
 import './Registration.css'
 
 function ClubRegistration({ user }) {
   const { clubId } = useParams()
   const navigate = useNavigate()
+  const { showToast } = useToast()
   const [loading, setLoading] = useState(false)
 
   // Setup axios defaults
@@ -31,11 +34,11 @@ function ClubRegistration({ user }) {
       return response.data
     },
     onSuccess: () => {
-      alert('Successfully registered for the club!')
-      navigate('/student-dashboard')
+      showToast('Successfully registered for the club!', 'success')
+      setTimeout(() => navigate('/student-dashboard'), 900)
     },
     onError: (error) => {
-      alert(error.response?.data?.error || 'Registration failed')
+      showToast(error.response?.data?.error || 'Registration failed', 'error')
     }
   })
 
@@ -56,7 +59,12 @@ function ClubRegistration({ user }) {
 
   return (
     <div className="registration-container">
-      <div className="registration-card">
+      <motion.div
+        className="registration-card"
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: 'spring', stiffness: 260, damping: 24 }}
+      >
         <div className="club-header">
           <h1>{club.name}</h1>
           <span className={`category ${club.category.toLowerCase()}`}>
@@ -137,7 +145,7 @@ function ClubRegistration({ user }) {
             </div>
           )}
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }

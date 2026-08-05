@@ -27,6 +27,15 @@
   align-items: center;
 }
 
+.auth-tagline {
+  min-height: 20px;
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-accent-text);
+  text-align: center;
+}
+
 .login-title {
   font-size: 1.35rem;
   font-weight: 800;

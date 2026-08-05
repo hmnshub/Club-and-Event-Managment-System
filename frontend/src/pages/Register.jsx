@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import axios from '../config/api' // Import configured axios instance
+import TypewriterText from '../components/TypewriterText'
 import './Login.css'
 
 function Register({ setUser, setUserType }) {
@@ -57,8 +58,11 @@ function Register({ setUser, setUserType }) {
   return (
     <div className="login-container-new">
       <div className="login-card">
+        <div className="auth-tagline">
+          <TypewriterText text="Create your account in seconds." speed={32} />
+        </div>
         <h2 className="login-title">Register</h2>
-        
+
         {error && <div className="error-message">{error}</div>}
         
         <form onSubmit={handleSubmit} className="login-form-new">

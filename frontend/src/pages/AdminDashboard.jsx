@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { motion, AnimatePresence } from 'framer-motion'
 import axios from '../config/api' // Import configured axios instance
+import { useToast } from '../context/ToastContext'
+import { useConfirm } from '../context/ConfirmContext'
+import TypewriterText from '../components/TypewriterText'
 import './Dashboard.css'
 
 function AdminDashboard({ user }) {
@@ -9,6 +13,8 @@ function AdminDashboard({ user }) {
   const [modalType, setModalType] = useState('') // 'club' or 'event'
   const [editItem, setEditItem] = useState(null)
   const queryClient = useQueryClient()
+  const { showToast } = useToast()
+  const confirmAction = useConfirm()
 
   // Setup axios defaults
   useEffect(() => {
@@ -57,19 +63,29 @@ function AdminDashboard({ user }) {
       const response = await axios.post(`/api/${type}s/${id}/generate-link`)
       return response.data
     },
-    onSuccess: (data) => {
-      alert(`New registration link generated: ${data.fullLink}`)
+    onSuccess: async (data) => {
+      try {
+        await navigator.clipboard.writeText(data.fullLink)
+        showToast('New registration link generated and copied to clipboard!', 'success')
+      } catch {
+        showToast(`New registration link: ${data.fullLink}`, 'info', 8000)
+      }
       queryClient.invalidateQueries([activeTab])
-    }
+    },
+    onError: () => showToast('Failed to generate link', 'error'),
   })
 
-  const handleDelete = (type, id) => {
-    if (window.confirm(`Are you sure you want to delete this ${type}?`)) {
-      if (type === 'club') {
-        deleteClubMutation.mutate(id)
-      } else {
-        deleteEventMutation.mutate(id)
-      }
+  const handleDelete = async (type, id) => {
+    const ok = await confirmAction(`This will permanently delete this ${type} and cannot be undone.`, {
+      title: `Delete ${type === 'club' ? 'Club' : 'Event'}?`,
+      confirmLabel: 'Delete',
+      danger: true,
+    })
+    if (!ok) return
+    if (type === 'club') {
+      deleteClubMutation.mutate(id, { onSuccess: () => showToast('Club deleted', 'success') })
+    } else {
+      deleteEventMutation.mutate(id, { onSuccess: () => showToast('Event deleted', 'success') })
     }
   }
 
@@ -84,7 +100,7 @@ function AdminDashboard({ user }) {
       const response = await axios.get(`/api/registrations/${type}/${id}/export/${format}`, {
         responseType: 'blob'
       })
-      
+
       const url = window.URL.createObjectURL(new Blob([response.data]))
       const link = document.createElement('a')
       link.href = url
@@ -92,27 +108,28 @@ function AdminDashboard({ user }) {
       document.body.appendChild(link)
       link.click()
       link.remove()
+      showToast('Registrations exported', 'success')
     } catch (error) {
-      alert('Export failed: ' + error.message)
+      showToast('Export failed: ' + error.message, 'error')
     }
   }
 
   return (
     <div className="dashboard-container">
-      <div className="dashboard-header">
-        <h1>Admin Dashboard</h1>
+      <div className="dashboard-header dashboard-header-admin">
+        <h1><TypewriterText text="Admin Dashboard" /></h1>
         <p>Welcome, {user.username}!</p>
       </div>
 
-      <div className="dashboard-tabs">
-        <button 
-          className={`tab-button ${activeTab === 'clubs' ? 'active' : ''}`}
+      <div className={`dashboard-tabs tabs-${activeTab}`}>
+        <button
+          className={`tab-button tab-clubs ${activeTab === 'clubs' ? 'active' : ''}`}
           onClick={() => setActiveTab('clubs')}
         >
           Manage Clubs
         </button>
-        <button 
-          className={`tab-button ${activeTab === 'events' ? 'active' : ''}`}
+        <button
+          className={`tab-button tab-events ${activeTab === 'events' ? 'active' : ''}`}
           onClick={() => setActiveTab('events')}
         >
           Manage Events
@@ -147,10 +164,15 @@ function AdminDashboard({ user }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {clubs?.map(club => (
-                      <tr key={club._id}>
+                    {clubs?.map((club, idx) => (
+                      <motion.tr
+                        key={club._id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.05, duration: 0.3 }}
+                      >
                         <td>{club.name}</td>
-                        <td>{club.category}</td>
+                        <td><span className={`category ${club.category.toLowerCase()}`}>{club.category}</span></td>
                         <td>
                           {club.registeredStudents.length}
                           {club.maxMembers && ` / ${club.maxMembers}`}
@@ -179,14 +201,14 @@ function AdminDashboard({ user }) {
                           >
                             Export CSV
                           </button>
-                          <button 
+                          <button
                             className="delete-btn"
                             onClick={() => handleDelete('club', club._id)}
                           >
                             Delete
                           </button>
                         </td>
-                      </tr>
+                      </motion.tr>
                     ))}
                   </tbody>
                 </table>
@@ -214,10 +236,15 @@ function AdminDashboard({ user }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {events?.map(event => (
-                      <tr key={event._id}>
+                    {events?.map((event, idx) => (
+                      <motion.tr
+                        key={event._id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.05, duration: 0.3 }}
+                      >
                         <td>{event.name}</td>
-                        <td>{event.category}</td>
+                        <td><span className={`category ${event.category.toLowerCase()}`}>{event.category}</span></td>
                         <td>{new Date(event.date).toLocaleDateString()}</td>
                         <td>
                           {event.registeredStudents.length}
@@ -247,14 +274,14 @@ function AdminDashboard({ user }) {
                           >
                             Export CSV
                           </button>
-                          <button 
+                          <button
                             className="delete-btn"
                             onClick={() => handleDelete('event', event._id)}
                           >
                             Delete
                           </button>
                         </td>
-                      </tr>
+                      </motion.tr>
                     ))}
                   </tbody>
                 </table>
@@ -264,21 +291,24 @@ function AdminDashboard({ user }) {
         )}
       </div>
 
-      {showModal && (
-        <CreateEditModal 
-          type={modalType}
-          item={editItem}
-          onClose={() => {
-            setShowModal(false)
-            setEditItem(null)
-          }}
-          onSuccess={() => {
-            queryClient.invalidateQueries([modalType === 'club' ? 'clubs' : 'events'])
-            setShowModal(false)
-            setEditItem(null)
-          }}
-        />
-      )}
+      <AnimatePresence>
+        {showModal && (
+          <CreateEditModal
+            type={modalType}
+            item={editItem}
+            onClose={() => {
+              setShowModal(false)
+              setEditItem(null)
+            }}
+            onSuccess={(action) => {
+              queryClient.invalidateQueries([modalType === 'club' ? 'clubs' : 'events'])
+              showToast(`${modalType === 'club' ? 'Club' : 'Event'} ${action === 'edit' ? 'updated' : 'created'} successfully`, 'success')
+              setShowModal(false)
+              setEditItem(null)
+            }}
+          />
+        )}
+      </AnimatePresence>
     </div>
   )
 }
@@ -332,7 +362,7 @@ function CreateEditModal({ type, item, onClose, onSuccess }) {
       }
     },
     onSuccess: () => {
-      onSuccess()
+      onSuccess(item ? 'edit' : 'create')
     }
   })
 
@@ -342,13 +372,26 @@ function CreateEditModal({ type, item, onClose, onSuccess }) {
   }
 
   return (
-    <div className="modal-overlay">
-      <div className="modal">
+    <motion.div
+      className="modal-overlay"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+    >
+      <motion.div
+        className="modal"
+        initial={{ opacity: 0, y: 24, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 12, scale: 0.97 }}
+        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="modal-header">
           <h2>{item ? 'Edit' : 'Create'} {type === 'club' ? 'Club' : 'Event'}</h2>
           <button className="close-btn" onClick={onClose}>×</button>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="modal-form">
           <div className="form-group">
             <label>Name:</label>
@@ -505,8 +548,8 @@ function CreateEditModal({ type, item, onClose, onSuccess }) {
             </button>
           </div>
         </form>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
 
