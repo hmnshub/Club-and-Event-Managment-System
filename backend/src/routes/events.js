@@ -6,74 +6,14 @@ import { authenticateToken, requireAdmin } from '../middleware/auth.js'
 
 const router = express.Router()
 
-// Get all events (demo data)
+// Get all active events
 router.get('/', async (req, res) => {
   try {
-    // Return demo events data
-    const demoEvents = [
-      {
-        _id: 'demo-event-1',
-        name: 'AI & Machine Learning Workshop',
-        description: 'Hands-on workshop covering the basics of AI and ML with practical examples.',
-        category: 'Workshop',
-        date: '2025-10-15',
-        time: '2:00 PM',
-        location: 'Computer Lab A',
-        duration: '3 hours',
-        isActive: true,
-        maxAttendees: 40,
-        registrationDeadline: '2025-10-10',
-        requirements: 'Basic Python knowledge recommended',
-        contactEmail: 'ai.workshop@university.edu',
-        registeredStudents: [],
-        registrationLink: 'demo-event-link-1',
-        club: null,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        _id: 'demo-event-2',
-        name: 'Annual Cultural Fest',
-        description: 'Celebrate diversity with performances, food, and cultural exhibitions.',
-        category: 'Cultural',
-        date: '2025-11-20',
-        time: '10:00 AM',
-        location: 'Main Campus Grounds',
-        duration: '8 hours',
-        isActive: true,
-        maxAttendees: 500,
-        registrationDeadline: '2025-11-15',
-        requirements: 'None - open to all',
-        contactEmail: 'culturalfest@university.edu',
-        registeredStudents: [],
-        registrationLink: 'demo-event-link-2',
-        club: null,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        _id: 'demo-event-3',
-        name: 'Startup Pitch Competition',
-        description: 'Present your business ideas and compete for funding and mentorship.',
-        category: 'Competition',
-        date: '2025-12-05',
-        time: '1:00 PM',
-        location: 'Business School Auditorium',
-        duration: '4 hours',
-        isActive: true,
-        maxAttendees: 100,
-        registrationDeadline: '2025-11-30',
-        requirements: 'Must have a business idea or prototype',
-        contactEmail: 'startup.competition@university.edu',
-        registeredStudents: [],
-        registrationLink: 'demo-event-link-3',
-        club: null,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }
-    ]
-
-    res.json(demoEvents)
+    const events = await Event.find({ isActive: true })
+      .populate('registeredStudents.student', 'name email studentId')
+      .populate('club', 'name')
+      .sort({ date: 1 })
+    res.json(events)
   } catch (error) {
     console.error('Get events error:', error)
     res.status(500).json({ error: 'Internal server error' })
@@ -84,12 +24,18 @@ router.get('/', async (req, res) => {
 router.get('/:identifier', async (req, res) => {
   try {
     const { identifier } = req.params
-    
-    // Try to find by ID first, then by registration link
-    let event = await Event.findById(identifier)
-      .populate('registeredStudents.student', 'name email studentId')
-      .populate('club', 'name')
-    
+
+    // Registration links are UUIDs, not Mongo ObjectIds — only attempt
+    // findById when the identifier is actually shaped like one, otherwise
+    // Mongoose throws a CastError instead of just returning null and the
+    // registrationLink fallback below never runs.
+    let event = null
+    if (/^[0-9a-fA-F]{24}$/.test(identifier)) {
+      event = await Event.findById(identifier)
+        .populate('registeredStudents.student', 'name email studentId')
+        .populate('club', 'name')
+    }
+
     if (!event) {
       event = await Event.findOne({ registrationLink: identifier })
         .populate('registeredStudents.student', 'name email studentId')

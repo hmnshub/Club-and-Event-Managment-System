@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Navbar from './components/Navbar'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -10,18 +10,18 @@ import EventRegistration from './pages/EventRegistration'
 import './App.css'
 
 function App() {
-  const [user, setUser] = useState(null)
-  const [userType, setUserType] = useState(null) // 'student' or 'admin'
-
-  useEffect(() => {
-    // Check for existing session
+  // Read any existing session synchronously on first render (not in a
+  // useEffect) — otherwise every route guard below sees `user = null` on
+  // the very first paint, which fires premature redirects. That's most
+  // visible when a link opens in a fresh tab (e.g. the student dashboard's
+  // "Register" button uses window.open): the new tab would flash to
+  // /login and then bounce to the dashboard instead of showing the page
+  // that was actually requested.
+  const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('user')
-    const savedUserType = localStorage.getItem('userType')
-    if (savedUser && savedUserType) {
-      setUser(JSON.parse(savedUser))
-      setUserType(savedUserType)
-    }
-  }, [])
+    return savedUser ? JSON.parse(savedUser) : null
+  })
+  const [userType, setUserType] = useState(() => localStorage.getItem('userType') || null) // 'student' or 'admin'
 
   const logout = () => {
     setUser(null)

@@ -5,7 +5,7 @@ import mongoose from 'mongoose'
 import authRoutes from './routes/auth.js'
 import clubRoutes from './routes/clubs.js'
 import eventRoutes from './routes/events.js'
-// import registrationRoutes from './routes/registrations.js'
+import registrationRoutes from './routes/registrations.js'
 
 dotenv.config()
 
@@ -32,7 +32,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use('/api/auth', authRoutes)
 app.use('/api/clubs', clubRoutes)
 app.use('/api/events', eventRoutes)
-// app.use('/api/registrations', registrationRoutes)
+app.use('/api/registrations', registrationRoutes)
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -5,6 +5,7 @@ import dbConnect, { dbReadyState } from '../src/lib/db.js'
 import authRoutes from '../src/routes/auth.js'
 import clubRoutes from '../src/routes/clubs.js'
 import eventRoutes from '../src/routes/events.js'
+import registrationRoutes from '../src/routes/registrations.js'
 import simpleRegister from './simple-register.js'
 
 const app = express()
@@ -20,12 +21,27 @@ app.use(cors({
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
-// Do not eagerly connect here; use cached connection helper per request
+// Do not eagerly connect at module load (serverless cold starts shouldn't
+// block on it), but do make sure a connection exists before any route
+// handler runs. clubs.js/events.js query MongoDB directly without calling
+// dbConnect() themselves — unlike the local dev server (src/server.js),
+// this serverless entrypoint never connects eagerly, so without this the
+// first request to hit /api/clubs or /api/events before /api/auth would
+// just hang against an unconnected Mongoose default connection.
+app.use(async (req, res, next) => {
+  try {
+    if (process.env.MONGODB_URI) await dbConnect()
+  } catch (err) {
+    console.error('DB connect middleware error:', err.message)
+  }
+  next()
+})
 
 // Routes
 app.use('/api/auth', authRoutes)
 app.use('/api/clubs', clubRoutes)
 app.use('/api/events', eventRoutes)
+app.use('/api/registrations', registrationRoutes)
 
 // Simple serverless-native registration endpoint also exposed via Express
 app.options('/api/simple-register', (req, res) => {
